@@ -15,6 +15,9 @@ import { analyzeSkinFromImage, SkinAnalysisResult } from './lib/skinAnalysis';
 import { fetchProducts, saveScan, saveRecommendedProducts, Product } from './lib/supabase';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { isMobileDevice } from './utils/deviceDetection';
+import { scanFaceApi } from "./services/scanService";
+import { base64ToFile } from "./utils/base64ToFile";
+
 
 type Page = 'home' | 'how-it-works' | 'products' | 'about' | 'scan' | 'camera' | 'processing' | 'results';
 
@@ -54,73 +57,37 @@ export default function App() {
   };
 
   const handleScanComplete = async (imageData: string) => {
-    setScannedImage(imageData);
-    setIsAnalyzing(true);
-    setError('');
+  setIsAnalyzing(true);
+  setError("");
 
-    try {
-      const result = await analyzeSkinFromImage(imageData);
-      setAnalysisResult(result);
-
-      const { data: scanData, error: scanError } = await saveScan({
-        user_id: undefined,
-        image_url: imageData,
-        analysis_results: result.details as any,
-        skin_concerns: result.concerns,
-        skin_type: result.skinType,
-        confidence_score: result.confidence,
-        spots_score: result.details.spots,
-        wrinkles_score: result.details.wrinkles,
-        texture_score: result.details.texture,
-        acne_score: result.details.acne,
-        dark_circles_score: result.details.darkCircles,
-        redness_score: result.details.redness,
-        oiliness_score: result.details.oiliness,
-        moisture_score: result.details.moisture,
-        pores_score: result.details.pores,
-        eye_bags_score: result.details.eyeBags,
-        radiance_score: result.details.radiance,
-        firmness_score: result.details.firmness,
-        droopy_upper_eyelid_score: result.details.droopyUpperEyelid,
-        droopy_lower_eyelid_score: result.details.droopyLowerEyelid,
-        detailed_analysis: result.detailedAnalysis,
-        recommendations: result.recommendations,
-      });
-
-      if (scanError) {
-        console.error('Error saving scan:', scanError);
-      }
-
-      const { data: products, error: productsError } = await fetchProducts({ concerns: result.concerns, limit: 6 });
-
-      if (productsError) {
-        console.error('Error fetching products:', productsError);
-      } else if (products && products.length > 0) {
-        setRecommendedProducts(products);
-
-        if (scanData) {
-          const recommendations = products.map((p) => ({
-            scan_id: scanData.id,
-            product_id: p.id,
-            relevance_score: Math.round(Math.random() * 30 + 70),
-          }));
-
-          await saveRecommendedProducts(recommendations);
-        }
-      } else {
-        const { data: allProducts } = await fetchProducts({ limit: 6 });
-
-        if (allProducts) {
-          setRecommendedProducts(allProducts);
-        }
-      }
-    } catch (error) {
-      console.error('Error during analysis:', error);
-      setError(error instanceof Error ? error.message : 'Failed to analyze image. Please try again.');
-    } finally {
-      setIsAnalyzing(false);
+  try {
+    const imageFile = base64ToFile(imageData);
+    const response = await scanFaceApi(imageFile, "v1");
+    if (!response.success) {
+      throw new Error(response.message || "Scan failed");
     }
-  };
+    const mappedResult: SkinAnalysisResult = {
+      confidence: response.confidence,
+      skinType: "normal",
+      concerns: response.skinConcerns,
+      details: response.analysis || {},
+      detailedAnalysis: response.message,
+      recommendations: response.recommendedProducts
+        ?.map((p: any) => `• ${p.name}`)
+        .join("\n") || ""
+    };
+
+    setAnalysisResult(mappedResult);
+    setScannedImage(imageData);
+    setCurrentPage("results");
+
+  } catch (err) {
+    console.error("Scan error:", err);
+    setError(err instanceof Error ? err.message : "Scan failed");
+  } finally {
+    setIsAnalyzing(false);
+  }
+};
 
   const handleNewScan = () => {
     setCurrentPage('home');
