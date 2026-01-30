@@ -63,6 +63,7 @@ export default function App() {
   try {
     const imageFile = base64ToFile(imageData);
     const response = await scanFaceApi(imageFile, "v1");
+    console.log(response,"recommendProducts")
     if (!response.success) {
       throw new Error(response.message || "Scan failed");
     }
@@ -76,6 +77,7 @@ export default function App() {
         ?.map((p: any) => `• ${p.name}`)
         .join("\n") || ""
     };
+    console.log(mappedResult,"mappedResult")
 
     setAnalysisResult(mappedResult);
     setScannedImage(imageData);

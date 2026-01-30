@@ -23,6 +23,7 @@ export const scanFaceApi = async (
     method: "POST",
     body: formData,
   });
+  console.log(response,"response")
 
   if (!response.ok) {
     const error = await response.json();
