@@ -11,13 +11,24 @@ import MobileOnlyWarning from './components/MobileOnlyWarning';
 import AnalysisResults from './components/AnalysisResults';
 import ProductRecommendations from './components/ProductRecommendations';
 import Footer from './components/Footer';
-import { analyzeSkinFromImage, SkinAnalysisResult } from './lib/skinAnalysis';
-import { fetchProducts, saveScan, saveRecommendedProducts, Product } from './lib/supabase';
+import { SkinAnalysisResult } from './lib/skinAnalysis';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { isMobileDevice } from './utils/deviceDetection';
 import { scanFaceApi } from "./services/scanService";
 import { base64ToFile } from "./utils/base64ToFile";
-
+ interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  description: string;
+  image_url: string;
+  price: number;
+  category: string;
+  skin_concerns: string[];
+  rating: number;
+  ingredients: string;
+  created_at: string;
+}
 
 type Page = 'home' | 'how-it-works' | 'products' | 'about' | 'scan' | 'camera' | 'processing' | 'results';
 

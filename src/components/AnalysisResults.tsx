@@ -103,31 +103,33 @@ export default function AnalysisResults({ result, imageData }: AnalysisResultsPr
         </div>
 
         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-gray-100 mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Detailed Skin Metrics</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Object.entries(result.details).map(([key, value]) => (
-              <div key={key} className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-100">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-gray-900">
-                    {metricLabels[key as keyof typeof metricLabels] || key}
-                  </span>
-                  <span className={`text-sm font-bold ${getScoreColor(value)}`}>
-                    {getScoreLabel(value)}
-                  </span>
-                </div>
-                <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`absolute inset-y-0 left-0 ${getScoreBg(value)} transition-all duration-1000 rounded-full`}
-                    style={{ width: `${value}%` }}
-                  />
-                </div>
-                <div className="mt-2 text-right">
-                  <span className="text-xs font-medium text-gray-600">{Math.round(value)}/100</span>
-                </div>
-              </div>
-            ))}
+  <h3 className="text-2xl font-bold text-gray-900 mb-6">Detailed Skin Metrics</h3>
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Object.entries(result.details)
+      .filter(([key]) => !['skinType', 'recommendations', 'detailedAnalysis'].includes(key))
+      .map(([key, value]) => (
+        <div key={key} className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-gray-900">
+              {metricLabels[key as keyof typeof metricLabels] || key}
+            </span>
+            <span className={`text-sm font-bold ${getScoreColor(value)}`}>
+              {getScoreLabel(value)}
+            </span>
+          </div>
+          <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`absolute inset-y-0 left-0 ${getScoreBg(value)} transition-all duration-1000 rounded-full`}
+              style={{ width: `${value}%` }}
+            />
+          </div>
+          <div className="mt-2 text-right">
+            <span className="text-xs font-medium text-gray-600">{Math.round(value)}/100</span>
           </div>
         </div>
+      ))}
+  </div>
+</div>
 
         {result.recommendations && (
           <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-6 sm:p-8 shadow-lg border border-emerald-100">
