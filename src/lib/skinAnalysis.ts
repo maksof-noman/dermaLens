@@ -25,24 +25,27 @@ export interface SkinAnalysisResult {
 }
 
 export const analyzeSkinFromImage = async (imageData: string): Promise<SkinAnalysisResult> => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  // const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  // const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-  if (!supabaseUrl) {
-    throw new Error('Supabase URL not configured');
-  }
+  // if (!supabaseUrl) {
+  //   throw new Error('Supabase URL not configured');
+  // }
 
-  const apiUrl = `${supabaseUrl}/functions/v1/analyze-skin`;
+  // const apiUrl = `${supabaseUrl}/functions/v1/analyze-skin`;
+
+  const api = `http://localhost:3000/api/dermaLens/scanFace`
+
 
   try {
     console.log('Compressing image before analysis...');
     const compressedImage = await compressImage(imageData, 1024, 1024, 0.85);
 
-    const response = await fetch(apiUrl, {
+    const response = await fetch(api, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseAnonKey}`,
+        // 'Authorization': `Bearer ${supabaseAnonKey}`,
       },
       body: JSON.stringify({ imageData: compressedImage }),
     });

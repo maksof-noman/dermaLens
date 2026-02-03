@@ -18,17 +18,22 @@ export const scanFaceApi = async (
   formData.append("image", imageFile);
   formData.append("promptVersion", promptVersion);
 
-  // Force local API
   const response = await fetch("http://localhost:3000/api/dermaLens/scanFace", {
     method: "POST",
     body: formData,
   });
-  console.log(response,"response")
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Scan failed");
+  const data = await response.json();
+
+  if(data){
+    const recommendedProducts = data.recommendedProducts;
+    console.log(recommendedProducts);
   }
 
-  return response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Scan failed");
+  }
+
+  return data;
 };
+
